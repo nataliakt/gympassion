@@ -8,6 +8,10 @@ export default class Main extends Component {
         title: "Teste"
     }
 
+    componentDidMount() {
+        this.props.navigation.navigate("Gyms");
+    }
+
     render() {
         return (<View>
             <Text>Página Main</Text>
