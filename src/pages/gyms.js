@@ -10,7 +10,7 @@ import GymView from '../components/gymView';
 export default class Speakers extends Component {
 
     static navigationOptions = {
-        title: 'Gyms'
+        title: 'Academias',
     }
 
     state = {
@@ -57,7 +57,7 @@ export default class Speakers extends Component {
     }
 
     renderItem = ({ item }) => (
-        <Card key={item.id}>
+        <Card key={item.id} left="#ff7d47">
             <TouchableOpacity
                 style={styles.gymContainer}
                 disabled={!item.title}

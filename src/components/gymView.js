@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import { View, Text, Image, StyleSheet } from 'react-native';
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
+import { Rating } from 'react-native-ratings';
 
 export default class GymView extends Component {
 
@@ -14,7 +15,7 @@ export default class GymView extends Component {
                     <View style={styles.image} />
                     <View style={styles.descriptionContainer}>
                         <View style={styles.title} />
-                        <View style={styles.rate} />
+                        <View style={styles.rating} />
                         <View style={styles.address} />
                     </View>
                 </View>
@@ -25,7 +26,12 @@ export default class GymView extends Component {
                 <Image style={styles.image} source={{uri: gym.logo}} />
                 <View style={styles.descriptionContainer}>
                     <Text style={styles.title}>{gym.title}</Text>
-                    <Text style={styles.rate}>{gym.rating}</Text>
+                    <Rating type="heart"
+                        style={styles.rating}
+                        ratingCount={5}
+                        imageSize={20}
+                        readonly={true}
+                        startingValue={gym.rating}/>
                     <Text style={styles.address}>{gym.address}</Text>
                 </View>
             </View>
@@ -47,18 +53,16 @@ const styles = StyleSheet.create({
         paddingLeft: 8
     },
     title: {
-        minWidth: 100,
+        minWidth: 150,
         minHeight: 18,
         color: "#424242",
         fontSize: 20,
         fontWeight: 'bold',
         marginTop: 3
     },
-    rate: {
-        minWidth: 50,
-        minHeight: 18,
-        color: "#f39713",
-        fontSize: 13,
+    rating: {
+        width: 100,
+        height: 18,
         marginTop: 3
     },
     address: {

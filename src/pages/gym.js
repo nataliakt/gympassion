@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
+import moment from 'moment';
 
-import { ScrollView, FlatList, TouchableOpacity, View, Text, Image, StyleSheet } from 'react-native';
-import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
+import AsyncStorage from "@react-native-community/async-storage";
+import { ScrollView, FlatList, TouchableOpacity, View, Text, Image, StyleSheet, Alert } from 'react-native';
+import Snackbar from 'react-native-snackbar';
 
 import Card from '../components/card';
 import GymView from '../components/gymView';
@@ -23,8 +25,6 @@ export default class Gym extends Component {
         const { navigation } = this.props;
         const gym = navigation.getParam('gym', {});
 
-        console.log(this.props)
-
         this.setState({
             gym,
             loading: false
@@ -32,13 +32,48 @@ export default class Gym extends Component {
     }
 
     renderItem = ({ item }) => (
-        <View
-        style={styles.activityContainer}>
-             <TouchableOpacity key={item.id}
-                 onPress={() => {}}>
-                <Text>{ item.title }</Text>
+        <Card key={item.id} left="#ff7d47">
+            <TouchableOpacity
+                style={styles.activityContainer}
+                disabled={!item.title}
+                onPress={() => {
+                    Alert.alert(
+                        'Checkin',
+                        'Deseja fazer checkin em ' + item.title + '?',
+                        [
+                            {
+                                text: 'Não, tô de boa',
+                                onPress: () => {},
+                                style: 'cancel',
+                            },
+                            {text: 'Claro!', onPress: async () => {
+                                let checkins = await AsyncStorage.getItem('checkins');
+                                checkins = checkins ? JSON.parse(checkins) : [];
+
+                                const checkin = {
+                                    id: this.state.gym.id + "_" + item.id,
+                                    gym: this.state.gym,
+                                    activity: item,
+                                    date: moment.utc()
+                                };
+                                checkins.unshift(checkin);
+                                await AsyncStorage.setItem('checkins', JSON.stringify(checkins));
+
+                                Snackbar.show({
+                                    title: 'Legal, checkin feito! No pain, no gain!',
+                                    duration: Snackbar.LENGTH_LONG,
+                                    color: "#fff"
+                                });
+                            }},
+                        ],
+                        {cancelable: false},
+                    );
+                }}>
+                    <Image style={styles.activityImage}
+                        source={require('../resources/exercises.png')} />
+                    <Text style={styles.activityTitle}>{ item.title }</Text>
             </TouchableOpacity>
-        </View>
+        </Card>
     );
 
     renderActivitiesTitle = () => {
@@ -65,25 +100,11 @@ export default class Gym extends Component {
                 </View>
                 <View style={styles.activitiesContainer}>
                     { this.renderActivitiesTitle() }
-                    <SwipeListView
-                        useFlatList={true}
+                    <FlatList
                         contentContainerStyle={styles.list}
                         data={ loading ? activitiesSkeleton : gym.activities }
+                        keyExtractor={item => item.id}
                         renderItem={this.renderItem}
-                        
-                        renderHiddenItem={ (rowData, rowMap) => (
-                            <View style={styles.rowBack}>
-                                <TouchableOpacity style={styles.rowBackTouch}>
-                                    <Text style={styles.rowBackText}>Left</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-                        leftOpenValue={75}
-                        disableLeftSwipe={true}
-                        onRowOpen={(rowKey, rowMap) => {
-                                rowMap[rowKey].closeRow()
-                        }}
-                        previewRowKey={this.state.gym.activities[0].key}
                     />
                 </View>
             </ScrollView>
@@ -106,29 +127,34 @@ const styles = StyleSheet.create({
         height: 250
     },
     activitiesContainer: {
+        // padding: 16
     },
     activitiesTitle: {
+        alignSelf: "center",
         textAlign: "center",
+        paddingHorizontal: 8,
+        paddingBottom: 3,
+        width: 200,
+        borderBottomColor: "#e54919",
+        borderBottomWidth: 3,
+        fontWeight: "bold",
+        fontSize: 25,
+        color: "#e54919",
+    },
+    list: {
         padding: 16
     },
     activityContainer: {
-        backgroundColor: "#fff",
-        padding: 16,
-        borderColor: "#eee",
-        borderWidth: 1
-    },
-    rowBack: {
         flexDirection: "row",
-        flex: 1
+        alignItems: "center"
     },
-    rowBackTouch: {
-        flex: 1,
-        padding: 16,
-        borderColor: "#eee",
-        borderWidth: 1,
-        backgroundColor: "#43a047"
+    activityImage: {
+        width: 35,
+        height: 35
     },
-    rowBackText: {
-        color: "#fff"
+    activityTitle: {
+        fontSize: 18,
+        color: "#424242",
+        marginLeft: 16
     }
 });
